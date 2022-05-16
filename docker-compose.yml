@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:11.4
+    container_name: database
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: database
+    ports:
+      - 5432:5432
+  
+  app:
+    build: . 
+    env_file:
+      - ./.env
+    restart: on-failure:10
+    depends_on:
+      - postgres
+    ports:
+      - 5000:5000
+    volumes: 
+      - .:/app

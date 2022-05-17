@@ -35,4 +35,4 @@ if __name__ == '__main__':
   from sql_alchemy import database
   migrate = Migrate(app, database)
   database.init_app(app)
-  app.run(host='0.0.0.0', debug=True)
+  app.run(host=HOST, debug=True)

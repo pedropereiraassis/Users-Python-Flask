@@ -4,6 +4,7 @@ from resources.users import UserRegister, UserLogin, User, UserLogout
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from blacklist import BLACKLIST
+from sql_alchemy import database
 from config import *
 
 app = Flask(__name__)
@@ -32,7 +33,6 @@ api.add_resource(UserLogout, '/logout')
 api.add_resource(User, '/users/<string:id>')
 
 if __name__ == '__main__':
-  from sql_alchemy import database
   migrate = Migrate(app, database)
   database.init_app(app)
   app.run(host='0.0.0.0', debug=True)

@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from blacklist import BLACKLIST
-from config import *
+from decouple import config
 
 database = SQLAlchemy()
 migrate = Migrate()
@@ -12,9 +12,9 @@ migrate = Migrate()
 def create_app():
 
   app = Flask(__name__)
-  app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+  app.config['SQLALCHEMY_DATABASE_URI'] = config('DATABASE_URL')
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-  app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
+  app.config['JWT_SECRET_KEY'] = config('JWT_SECRET_KEY')
   app.config['JWT_BLACKLIST_ENABLED'] = True
   api = Api(app)
   jwt = JWTManager(app)

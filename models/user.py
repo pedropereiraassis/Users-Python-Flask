@@ -1,8 +1,8 @@
 from app import database
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.dialects.postgresql import UUID 
 from datetime import datetime
 from uuid import uuid4
-
 class UserModel(database.Model):
   __tablename__ = 'users'
   id = database.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -11,7 +11,7 @@ class UserModel(database.Model):
   endereco = database.Column(database.JSON, nullable=False)
   cpf = database.Column(database.String(11), nullable=False)
   pis = database.Column(database.String(40), nullable=False)
-  senha = database.Column(database.String(40), nullable=False)
+  senha = database.Column(database.String(), nullable=False)
   created_at = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
 
   def __init__(self, nome, email, endereco, cpf, pis, senha, confirm_senha):
@@ -23,9 +23,12 @@ class UserModel(database.Model):
     self.senha = senha
     self.confirm_senha = confirm_senha
   
-  def __repr__(self):
-        return '<User {}>'.format(self.nome)
+  def set_password(self, senha):
+    self.senha = generate_password_hash(senha)
   
+  def check_password(self, senha):
+    return check_password_hash(self.senha, senha)
+
   def json(self):
     return {
       'nome': self.nome,

@@ -1,12 +1,12 @@
 from flask_restful import Resource, reqparse, request
 from models.user import UserModel
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt
-from hmac import compare_digest
 from blacklist import BLACKLIST
 
 class UserRegister(Resource):
 
-  def post(self):
+  @staticmethod
+  def post():
     arguments = reqparse.RequestParser()
     arguments.add_argument('nome', type=str, required=True, help="Field 'nome' cannot be null")
     arguments.add_argument('cpf', type=str, required=True, help="Field 'cpf' cannot be null")
@@ -18,6 +18,7 @@ class UserRegister(Resource):
     data = arguments.parse_args()
 
     if UserModel.find_by_cpf(data['cpf']):
+      print(UserModel.find_by_cpf(data['cpf']))
       return { "message": f"cpf '{data['cpf']}' already registered" }, 400
     
     if data['senha'] != data['confirm_senha']:
@@ -25,6 +26,7 @@ class UserRegister(Resource):
 
     user = UserModel(**data)
     try:
+      user.set_password(senha=data['senha'])
       user.save_user()
     except:
       return { "message": "error while trying to save user" }, 500
@@ -35,13 +37,13 @@ class UserLogin(Resource):
   @staticmethod
   def post():
     arguments = reqparse.RequestParser()
-    arguments.add_argument('cpf', type=str, required=True, help="Field 'nome' cannot be null")
-    arguments.add_argument('senha', type=str, required=True, help="Field 'nome' cannot be null")
+    arguments.add_argument('cpf', type=str, required=True, help="Field 'cpf' cannot be null")
+    arguments.add_argument('senha', type=str, required=True, help="Field 'senha' cannot be null")
     data = arguments.parse_args()
-    
+
     user = UserModel.find_by_cpf(data['cpf'])
 
-    if user and compare_digest(user.senha, data['senha']):
+    if user and user.check_password(senha=data['senha']):
       token = create_access_token(identity=user.id)
       return { "message": "user logged in successfully", "token": token }, 200
     

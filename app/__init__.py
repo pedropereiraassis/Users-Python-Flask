@@ -4,9 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from blacklist import BLACKLIST
-from decouple import config
-DATABASE_URL = config('DATABASE_URL')
-JWT_SECRET_KEY = config('JWT_SECRET_KEY')
+from config import *
 
 database = SQLAlchemy()
 migrate = Migrate()

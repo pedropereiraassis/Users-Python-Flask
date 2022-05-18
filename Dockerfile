@@ -6,5 +6,10 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY . .
+RUN chmod +x boot.sh
 
-CMD [ "python", "app.py" ]
+ENV FLASK_APP app
+
+EXPOSE 5000
+
+ENTRYPOINT ["./boot.sh"]

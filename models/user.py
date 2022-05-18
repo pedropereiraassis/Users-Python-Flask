@@ -1,4 +1,4 @@
-from sql_alchemy import database
+from app import database
 from sqlalchemy.dialects.postgresql import UUID 
 from datetime import datetime
 from uuid import uuid4
@@ -22,6 +22,9 @@ class UserModel(database.Model):
     self.pis = pis
     self.senha = senha
     self.confirm_senha = confirm_senha
+  
+  def __repr__(self):
+        return '<User {}>'.format(self.nome)
   
   def json(self):
     return {

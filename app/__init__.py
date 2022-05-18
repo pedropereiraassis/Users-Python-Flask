@@ -7,7 +7,6 @@ from blacklist import BLACKLIST
 from decouple import config
 DATABASE_URL = config('DATABASE_URL')
 JWT_SECRET_KEY = config('JWT_SECRET_KEY')
-FLASK_RUN_PORT = config('FLASK_RUN_PORT')
 
 database = SQLAlchemy()
 migrate = Migrate()
@@ -19,7 +18,6 @@ def create_app():
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
   app.config['JWT_BLACKLIST_ENABLED'] = True
-  app.config['FLASK_RUN_PORT'] = FLASK_RUN_PORT
   api = Api(app)
   jwt = JWTManager(app)
 

@@ -32,7 +32,7 @@ def create_app():
   database.init_app(app)
   migrate.init_app(app, database)
 
-  import models
+  from models import user
   from resources.users import UserRegister, UserLogin, User, UserLogout
 
   api.add_resource(UserRegister, '/register')

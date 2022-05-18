@@ -18,7 +18,6 @@ def create_app():
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
   app.config['JWT_BLACKLIST_ENABLED'] = True
-  app.config['']
   api = Api(app)
   jwt = JWTManager(app)
 

@@ -15,4 +15,4 @@ Then and run the following command to start the server and database
 docker-compose build && docker-compose up
 ```
 
-And now you can test all the routes.
+And now you can test all the routes. You're ready to go.

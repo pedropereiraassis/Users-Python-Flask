@@ -16,8 +16,15 @@ def create_app():
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   app.config['JWT_SECRET_KEY'] = config('JWT_SECRET_KEY')
   app.config['JWT_BLACKLIST_ENABLED'] = True
+  app.config['SESSION_COOKIE_HTTPONLY'] = True
+  app.config['REMEMBER_COOKIE_HTTPONLY'] = True
+  app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
   api = Api(app)
   jwt = JWTManager(app)
+
+  @app.route('/')
+  def index():
+    return jsonify({ "message": "Hello! Register or login to access this API." }), 200
 
   @jwt.token_in_blocklist_loader
   def verify_blacklist(self, token):

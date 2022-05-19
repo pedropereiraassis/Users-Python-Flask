@@ -47,7 +47,7 @@ class UserLogin(Resource):
       token = create_access_token(identity=user.id)
       return { "message": "user logged in successfully", "token": token }, 200
     
-    return { "message": "incorrect cpf or password" }, 401
+    return { "message": "invalid credentials" }, 401
 
 class UserLogout(Resource):
 

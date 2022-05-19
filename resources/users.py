@@ -142,3 +142,11 @@ class User(Resource):
         return { "message": "user deleted" }, 200
       return { "message": "oops, you can't do that" }, 403
     return { "message": "user not found"}, 404
+
+class Home(Resource):
+
+  @jwt_required()
+  def get(self):
+    session_user_id = get_jwt_identity()
+    session_user = UserModel.find_by_id(session_user_id)
+    return{ "message": f"hello {session_user.nome}! Welcome to Users-Flask API." }, 200

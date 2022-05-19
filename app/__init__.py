@@ -18,7 +18,6 @@ def create_app():
   app.config['PROPAGATE_EXCEPTIONS'] = True
   app.config['JWT_SECRET_KEY'] = config('JWT_SECRET_KEY')
   app.config['JWT_BLACKLIST_ENABLED'] = True
-  app.config['JWT_COOKIE_SECURE'] = True
   app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
   app.config['SESSION_COOKIE_HTTPONLY'] = True
   app.config['REMEMBER_COOKIE_HTTPONLY'] = True
@@ -26,27 +25,24 @@ def create_app():
   api = Api(app)
   jwt = JWTManager(app)
 
-  @app.route('/')
-  def index():
-    return jsonify({ "message": "Olá! Bem vindo a API de Usuarios-Flask." }), 200
-
   @jwt.token_in_blocklist_loader
   def verify_blacklist(self, token):
     return token['jti'] in BLACKLIST
 
   @jwt.revoked_token_loader
   def access_token_invalid(jwt_header, jwt_payload):
-    return jsonify({ "message": "you need to login first" }), 401
+    return jsonify({ "message": "hello! you need to login first" }), 401
 
   database.init_app(app)
   migrate.init_app(app, database)
 
   from models import user
-  from resources.users import UserRegister, UserLogin, User, UserLogout
+  from resources.users import UserRegister, UserLogin, User, UserLogout, Home
 
   api.add_resource(UserRegister, '/register')
   api.add_resource(UserLogin, '/login')
   api.add_resource(UserLogout, '/logout')
   api.add_resource(User, '/users/<string:id>')
+  api.add_resource(Home, '/')
 
   return app

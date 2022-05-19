@@ -22,6 +22,7 @@ class UserModel(database.Model):
     self.pis = pis
     self.senha = senha
     self.confirm_senha = confirm_senha
+    self.id = None
   
   def set_password(self, senha):
     self.senha = generate_password_hash(senha)
@@ -31,6 +32,7 @@ class UserModel(database.Model):
 
   def json(self):
     return {
+      'id': str(self.id),
       'nome': self.nome,
       'email': self.email,
       'endereco': self.endereco,
@@ -52,6 +54,9 @@ class UserModel(database.Model):
       return user
     return None
   
+  def set_user_id(self, user):
+    self.id = user.id
+
   def save_user(self):
     database.session.add(self)
     database.session.commit()

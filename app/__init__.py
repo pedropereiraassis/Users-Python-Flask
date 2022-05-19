@@ -24,7 +24,7 @@ def create_app():
 
   @app.route('/')
   def index():
-    return jsonify({ "message": "Hello! Register or login to access this API." }), 200
+    return jsonify({ "message": "Olá! Bem vindo a API de Usuarios-Flask." }), 200
 
   @jwt.token_in_blocklist_loader
   def verify_blacklist(self, token):

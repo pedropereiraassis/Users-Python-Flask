@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from blacklist import BLACKLIST
 from decouple import config
+from datetime import timedelta
 
 database = SQLAlchemy()
 migrate = Migrate()
@@ -16,6 +17,8 @@ def create_app():
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   app.config['JWT_SECRET_KEY'] = config('JWT_SECRET_KEY')
   app.config['JWT_BLACKLIST_ENABLED'] = True
+  app.config['JWT_COOKIE_SECURE'] = True
+  app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
   app.config['SESSION_COOKIE_HTTPONLY'] = True
   app.config['REMEMBER_COOKIE_HTTPONLY'] = True
   app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'

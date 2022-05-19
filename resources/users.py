@@ -82,13 +82,20 @@ class User(Resource):
 
   @jwt_required()
   def get(self, id):
-    user = UserModel.find_by_id(id)
+    try:
+      user = UserModel.find_by_id(id)
+    except:
+      return { "message": "invalid id" }, 400
     if user:
       return user.json()
     return { "message": "user not found" }, 404
 
   @jwt_required()
   def put(self, id):
+    try:
+      user = UserModel.find_by_id(id)
+    except:
+      return { "message": "invalid id" }, 400
     session_user_id = get_jwt_identity()
     session_user = UserModel.find_by_id(session_user_id)
     user = UserModel.find_by_id(id)
@@ -123,6 +130,10 @@ class User(Resource):
   
   @jwt_required()
   def delete(self, id):
+    try:
+      user = UserModel.find_by_id(id)
+    except:
+      return { "message": "invalid id" }, 400
     session_user_id = get_jwt_identity()
     session_user = UserModel.find_by_id(session_user_id)
     user = UserModel.find_by_id(id)

@@ -1,6 +1,6 @@
-from flask_restful import Resource, reqparse, request
+from flask_restful import Resource, reqparse
 from models.user import UserModel
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity
 from blacklist import BLACKLIST
 import re
 
@@ -16,6 +16,7 @@ class UserRegister(Resource):
     arguments.add_argument('email', type=str, required=True, help="field 'email' cannot be null")
     arguments.add_argument('endereco', type=dict, required=True, help="field 'endereco' cannot be null")
     arguments.add_argument('pis', type=str, required=True, help="field 'pis' cannot be null")
+    arguments.add_argument('admin', type=bool, default=False)
     arguments.add_argument('senha', type=str, required=True, help="field 'senha' cannot be null")
     arguments.add_argument('confirm_senha', type=str, required=True, help="field 'confirm_senha' cannot be null")
     data = arguments.parse_args()
@@ -88,39 +89,56 @@ class User(Resource):
 
   @jwt_required()
   def put(self, id):
-    arguments = reqparse.RequestParser()
-    arguments.add_argument('nome', type=str, required=True, help="field 'nome' cannot be null")
-    arguments.add_argument('email', type=str, required=True, help="field 'email' cannot be null")
-    arguments.add_argument('endereco', type=dict, required=True, help="field 'endereco' cannot be null")
-    arguments.add_argument('pis', type=str, required=True, help="field 'pis' cannot be null")
-    data = arguments.parse_args()
-
-    if not  re.search(email_regex,data['email']):
-      return { "message": "invalid email" }, 400
-    
-    if not all(key in data['endereco'] for key in ( "nacionalidade", "estado", "municipio", "cep", "rua", "numero" )):
-      return { "message": "field 'endereco' must be correctly fulfilled" }, 400
-
-    if len(data['pis']) != 11:
-      return { "message": "invalid pis, must have 11 digits" }, 400
-
+    session_user_id = get_jwt_identity()
+    session_user = UserModel.find_by_id(session_user_id)
     user = UserModel.find_by_id(id)
+
     if user:
-      user.update_user(**data)
-      try:
-        user.save_user()
-      except:
-        return { "message": "error while trying to update user"}, 500
-      return user.json(), 200
+
+      if (session_user.admin == True) or (str(user.id) == str(session_user_id)):
+        arguments = reqparse.RequestParser()
+        arguments.add_argument('nome', type=str, required=True, help="field 'nome' cannot be null")
+        arguments.add_argument('email', type=str, required=True, help="field 'email' cannot be null")
+        arguments.add_argument('endereco', type=dict, required=True, help="field 'endereco' cannot be null")
+        arguments.add_argument('pis', type=str, required=True, help="field 'pis' cannot be null")
+        data = arguments.parse_args()
+
+        if not  re.search(email_regex,data['email']):
+          return { "message": "invalid email" }, 400
+        
+        if not all(key in data['endereco'] for key in ( "nacionalidade", "estado", "municipio", "cep", "rua", "numero" )):
+          return { "message": "field 'endereco' must be correctly fulfilled" }, 400
+
+        if len(data['pis']) != 11:
+          return { "message": "invalid pis, must have 11 digits" }, 400
+
+        try:
+          user.update_user(**data)
+          user.save_user()
+        except:
+          return { "message": "error while trying to update user"}, 500
+        return { "message": "user updated successfully", "user": user.json() }, 200
+      return { "message": "oops, you can't do that" }, 403
     return { "message": "user not found" }, 404
   
   @jwt_required()
   def delete(self, id):
+    session_user_id = get_jwt_identity()
+    session_user = UserModel.find_by_id(session_user_id)
     user = UserModel.find_by_id(id)
+
     if user:
-      try:
-        user.delete_user()
-      except:
-        return { "message": "error while trying to delete user"}, 500
-      return { "message": "user deleted" }, 200
+
+      if (session_user.admin == True) or (str(user.id) == str(session_user_id)):
+
+        try:
+          user.delete_user()
+        except:
+          return { "message": "error while trying to delete user"}, 500
+        if str(user.id) == str(session_user_id):
+          jwt_id = get_jwt()['jti']
+          BLACKLIST.add(jwt_id)
+          return { "message": "you deleted your user so we logged you out" }, 200
+        return { "message": "user deleted" }, 200
+      return { "message": "oops, you can't do that" }, 403
     return { "message": "user not found"}, 404

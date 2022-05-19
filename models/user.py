@@ -11,18 +11,21 @@ class UserModel(database.Model):
   endereco = database.Column(database.JSON, nullable=False)
   cpf = database.Column(database.String(11), nullable=False)
   pis = database.Column(database.String(40), nullable=False)
+  admin = database.Column(database.Boolean(), nullable=False)
   senha = database.Column(database.String(), nullable=False)
   created_at = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)
 
-  def __init__(self, nome, email, endereco, cpf, pis, senha, confirm_senha):
+  def __init__(self, nome, email, endereco, cpf, pis, admin, senha, confirm_senha):
+    self.id = None  
     self.nome = nome
     self.email = email
     self.endereco = endereco
     self.cpf = cpf
     self.pis = pis
+    self.admin = admin
     self.senha = senha
     self.confirm_senha = confirm_senha
-    self.id = None
+
   
   def set_password(self, senha):
     self.senha = generate_password_hash(senha)
@@ -37,7 +40,8 @@ class UserModel(database.Model):
       'email': self.email,
       'endereco': self.endereco,
       'cpf': self.cpf,
-      'pis': self.pis
+      'pis': self.pis,
+      'admin': self.admin
     }
   
   @classmethod

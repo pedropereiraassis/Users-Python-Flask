@@ -10,9 +10,33 @@ heroku-postgres to the postgres that Docker will build and run):
 DATABASE_URL='postgres://postgres:postgres@database:5432/database'
 ```
 
-Then and run the following command to start the server and database
+Then run the following command to start the server and database:
 ```
 docker-compose build && docker-compose up
 ```
 
-And now you can test all the routes. You're ready to go.
+And now you can test all the routes below:
+```
+# Testing Locally
+GET http://127.0.0.1:5000/
+POST http://127.0.0.1:5000/register
+POST http://127.0.0.1:5000/login
+POST http://127.0.0.1:5000/logout
+GET http://127.0.0.1:5000/users
+GET http://127.0.0.1:5000/users/:id
+POST http://127.0.0.1:5000/users/:id
+PUT http://127.0.0.1:5000/users/:id
+DELETE http://127.0.0.1:5000/users/:id
+
+# Testing on Heroku
+GET https://flaskusers.herokuapp.com/
+POST https://flaskusers.herokuapp.com/register
+POST https://flaskusers.herokuapp.com/login
+POST https://flaskusers.herokuapp.com/logout
+GET https://flaskusers.herokuapp.com/users
+GET https://flaskusers.herokuapp.com/users/:id
+POST https://flaskusers.herokuapp.com/users/:id
+PUT https://flaskusers.herokuapp.com/users/:id
+DELETE https://flaskusers.herokuapp.com/users/:id
+```
+You're ready to go.

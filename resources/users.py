@@ -77,6 +77,24 @@ class UserLogout(Resource):
       BLACKLIST.add(jwt_id)
       return { "message": "user logged out successfully" }, 200
 
+class Users(Resource):
+  
+  @jwt_required()
+  def get(self):
+
+    session_user_id = get_jwt_identity()
+    session_user = UserModel.find_by_id(session_user_id)
+    
+    if not session_user:
+      return { "message": "hello! you need to login first" }, 401
+
+    if session_user.admin == True:
+      try:
+        users = UserModel.get_all_users()
+        return { "users": [user.json() for user in users] }, 200
+      except:
+        return { "message": "error while trying to get users" }, 500
+    return { "message": "oops, you can't do that" }, 403
 
 class User(Resource):
 
@@ -92,67 +110,74 @@ class User(Resource):
 
   @jwt_required()
   def put(self, id):
+    session_user_id = get_jwt_identity()
+    session_user = UserModel.find_by_id(session_user_id)
+
+    if not session_user:
+      return { "message": "hello! you need to login first" }, 401
+    
     try:
       user = UserModel.find_by_id(id)
     except:
       return { "message": "invalid id" }, 400
-    session_user_id = get_jwt_identity()
-    session_user = UserModel.find_by_id(session_user_id)
-    user = UserModel.find_by_id(id)
 
-    if user:
+    if not user:
+      return { "message": "user not found" }, 404
 
-      if (session_user.admin == True) or (str(user.id) == str(session_user_id)):
-        arguments = reqparse.RequestParser()
-        arguments.add_argument('nome', type=str, required=True, help="field 'nome' cannot be null")
-        arguments.add_argument('email', type=str, required=True, help="field 'email' cannot be null")
-        arguments.add_argument('endereco', type=dict, required=True, help="field 'endereco' cannot be null")
-        arguments.add_argument('pis', type=str, required=True, help="field 'pis' cannot be null")
-        data = arguments.parse_args()
+    if (session_user.admin == True) or (str(user.id) == str(session_user_id)):
+      arguments = reqparse.RequestParser()
+      arguments.add_argument('nome', type=str, required=True, help="field 'nome' cannot be null")
+      arguments.add_argument('email', type=str, required=True, help="field 'email' cannot be null")
+      arguments.add_argument('endereco', type=dict, required=True, help="field 'endereco' cannot be null")
+      arguments.add_argument('pis', type=str, required=True, help="field 'pis' cannot be null")
+      data = arguments.parse_args()
 
-        if not  re.search(email_regex,data['email']):
-          return { "message": "invalid email" }, 400
-        
-        if not all(key in data['endereco'] for key in ( "nacionalidade", "estado", "municipio", "cep", "rua", "numero" )):
-          return { "message": "field 'endereco' must be correctly fulfilled" }, 400
+      if not  re.search(email_regex,data['email']):
+        return { "message": "invalid email" }, 400
+      
+      if not all(key in data['endereco'] for key in ( "nacionalidade", "estado", "municipio", "cep", "rua", "numero" )):
+        return { "message": "field 'endereco' must be correctly fulfilled" }, 400
 
-        if len(data['pis']) != 11:
-          return { "message": "invalid pis, must have 11 digits" }, 400
+      if len(data['pis']) != 11:
+        return { "message": "invalid pis, must have 11 digits" }, 400
 
-        try:
-          user.update_user(**data)
-          user.save_user()
-        except:
-          return { "message": "error while trying to update user"}, 500
-        return { "message": "user updated successfully", "user": user.json() }, 200
-      return { "message": "oops, you can't do that" }, 403
-    return { "message": "user not found" }, 404
+      try:
+        user.update_user(**data)
+        user.save_user()
+      except:
+        return { "message": "error while trying to update user"}, 500
+      return { "message": "user updated successfully", "user": user.json() }, 200
+    return { "message": "oops, you can't do that" }, 403
   
   @jwt_required()
   def delete(self, id):
+    session_user_id = get_jwt_identity()
+    session_user = UserModel.find_by_id(session_user_id)
+
+    if not session_user:
+      return { "message": "hello! you need to login first" }, 401
+    
     try:
       user = UserModel.find_by_id(id)
     except:
       return { "message": "invalid id" }, 400
-    session_user_id = get_jwt_identity()
-    session_user = UserModel.find_by_id(session_user_id)
-    user = UserModel.find_by_id(id)
 
-    if user:
+    if not user:
+      return { "message": "user not found"}, 404
+    
+    if (session_user.admin == True) or (str(user.id) == str(session_user_id)):
 
-      if (session_user.admin == True) or (str(user.id) == str(session_user_id)):
-
-        try:
-          user.delete_user()
-        except:
-          return { "message": "error while trying to delete user"}, 500
-        if str(user.id) == str(session_user_id):
-          jwt_id = get_jwt()['jti']
-          BLACKLIST.add(jwt_id)
-          return { "message": "you deleted your user so we logged you out" }, 200
-        return { "message": "user deleted" }, 200
-      return { "message": "oops, you can't do that" }, 403
-    return { "message": "user not found"}, 404
+      try:
+        user.delete_user()
+      except:
+        return { "message": "error while trying to delete user"}, 500
+      if str(user.id) == str(session_user_id):
+        jwt_id = get_jwt()['jti']
+        BLACKLIST.add(jwt_id)
+        return { "message": "you deleted your user so we logged you out" }, 200
+      return { "message": "user deleted" }, 200
+    return { "message": "oops, you can't do that" }, 403
+    
 
 class Home(Resource):
 
@@ -160,4 +185,7 @@ class Home(Resource):
   def get(self):
     session_user_id = get_jwt_identity()
     session_user = UserModel.find_by_id(session_user_id)
+
+    if not session_user:
+      return { "message": "hello! you need to login first" }, 401
     return{ "message": f"hello {session_user.nome}! Welcome to Users-Flask API." }, 200

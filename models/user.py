@@ -45,6 +45,13 @@ class UserModel(database.Model):
     }
   
   @classmethod
+  def get_all_users(cls):
+    users = cls.query.all()
+    if users:
+      return users
+    return None
+
+  @classmethod
   def find_by_id(cls, id):
     user = cls.query.filter_by(id=id).first()
     if user:

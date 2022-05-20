@@ -37,12 +37,13 @@ def create_app():
   migrate.init_app(app, database)
 
   from models import user
-  from resources.users import UserRegister, UserLogin, User, UserLogout, Home
+  from resources.users import UserRegister, UserLogin, User, UserLogout, Home, Users
 
   api.add_resource(UserRegister, '/register')
   api.add_resource(UserLogin, '/login')
   api.add_resource(UserLogout, '/logout')
   api.add_resource(User, '/users/<string:id>')
+  api.add_resource(Users, '/users')
   api.add_resource(Home, '/')
 
   return app
